@@ -1,0 +1,103 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="row">
+    <div class="col-xs-2">Input:</div>  <input class="col-xs-10" type="text" id="input" />
+</div>
+
+<div class="row">
+    <div class="col-xs-2 ">Program: </div> <textarea class="col-xs-10" id="program"></textarea>
+</div>
+
+<div class="row">
+    <div class="col-xs-2"></div>
+    <div class="col-xs-10">
+        <button id="execute" class="btn btn-success"><span class="glyphicon glyphicon-play pull-left"></span> Execute</button>
+    </div>
+</div>
+
+<div id="result">
+    blabla
+</div>
+
+@section scripts{
+    @Scripts.Render("~/bundles/turingmachine");
+
+    <script type="text/javascript">
+
+        (function ($, TuringMachine, undefiened) {
+
+            var executeButton,
+                inputText,
+                programText,
+                resultContainer;
+
+            function onLoad() {
+
+                executeButton = $('#execute');
+                inputText = $('#input');
+                programText = $('#program');
+                resultContainer = $('#result');
+
+                executeButton.click(onExecute);
+            }
+
+            function onLineReceived(line) {
+                resultContainer.append(line.replace(/\n/g, '<br />') + ' <br />');
+            }
+
+            function onExecute() {
+                try {
+                    onExecuteInternal();
+
+                } catch (ex) {
+
+                    alert(ex.message);
+                }
+            }
+
+            function onExecuteInternal() {
+                resultContainer.html('');
+
+                var input = inputText.val();
+                var program = programText.val();
+
+                var reader = new TuringMachine.Implementation.Reader(program);
+                var parser = new TuringMachine.Implementation.Parser(reader);
+                var writer = new TuringMachine.Implementation.Writer(onLineReceived);
+
+                var manager = new TuringMachine.TuringMachineManager(parser, writer, input);
+                manager.execute();
+            }
+
+            $(onLoad);
+
+        })(jQuery, TuringMachine);
+    </script>
+}
+
+@section styles{
+    <style type="text/css">
+        .glyphicon.bigger {
+            font-size: 30px;
+        }
+
+        #program {
+            height: 250px;
+        }
+
+        div[class="row"] {
+            margin-top: 15px;
+        }
+
+        #execute {
+            width: 250px;
+            height: 50px;
+            margin: auto;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 30px;
+        }
+    </style>
+}
